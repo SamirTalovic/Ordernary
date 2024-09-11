@@ -1,10 +1,9 @@
-﻿namespace Ordernary.Models
+﻿namespace Ordernary.Models.DTOs
 {
-    public class Table
+    public class TableDTO
     {
         public int TableId { get; set; }
         public bool Occupied { get; set; }
-        public List<Order>? Orders { get; set; }
         public bool WeiterCall { get; set; }
     }
 }
