@@ -48,7 +48,8 @@ namespace Ordernary.Controllers
             {
                 TableId = createOrderDto.TableId,
                 Done = false, // Default value
-                OrderArticles = new List<OrderArticle>()
+                OrderArticles = new List<OrderArticle>(),
+                CreatedAt = DateTime.UtcNow
             };
 
             // Validate and add each article

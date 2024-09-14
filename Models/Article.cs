@@ -6,6 +6,7 @@
         public string Name { get; set; }
         public int Price { get; set; }
         public List<OrderArticle> OrderArticles { get; set; }
-
+        public string Category { get; set; }
+        public string ImageUrl { get; set; }
     }
 }

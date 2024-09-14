@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Mvc;
 using Ordernary.Models;
 using Ordernary.Models.DTOs;
 using Ordernary.Repositories.Implementation;
@@ -10,10 +12,12 @@ namespace Ordernary.Controllers
     [ApiController]
     public class ArticleController : ControllerBase
     {
+        private readonly Cloudinary _cloudinary;
         private readonly IArticleInterface _articleRepository;
-        public ArticleController(IArticleInterface articleInterface)
+        public ArticleController(IArticleInterface articleInterface, Cloudinary cloudinary)
         {
             _articleRepository = articleInterface;
+            _cloudinary = cloudinary;
         }
         [HttpGet("allarticles")]
         public async Task<ActionResult<IEnumerable<Article>>> GetArticles()
@@ -32,12 +36,29 @@ namespace Ordernary.Controllers
             return Ok(article);
         }
         [HttpPost("createarticle")]
-        public async Task<ActionResult<Article>> PostArticle(ArticleDTO articleDto)
+        public async Task<ActionResult<Article>> PostArticle([FromForm] ArticleDTO articleDto)
         {
+            var uploadResult = new ImageUploadResult();
+
+            if (articleDto.Photo != null)
+            {
+                using (var stream = articleDto.Photo.OpenReadStream())
+                {
+                    var uploadParams = new ImageUploadParams()
+                    {
+                        File = new FileDescription(articleDto.Photo.FileName, stream),
+                        Transformation = new Transformation().Width(500).Height(500).Crop("fill")
+                    };
+                    uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                }
+            }
+
             var article = new Article
             {
                 Name = articleDto.Name,
-                Price = articleDto.Price
+                Price = articleDto.Price,
+                Category = articleDto.Category,
+                ImageUrl = uploadResult.SecureUrl.ToString() 
             };
 
             await _articleRepository.AddAsync(article);
@@ -46,7 +67,7 @@ namespace Ordernary.Controllers
             return CreatedAtAction(nameof(GetArticle), new { id = article.ArticleId }, article);
         }
         [HttpPut("update{id}")]
-        public async Task<IActionResult> PutArticle(int id, ArticleDTO articleDto)
+        public async Task<IActionResult> PutArticle(int id, [FromForm] ArticleDTO articleDto)
         {
             var article = await _articleRepository.GetByIdAsync(id);
             if (article == null)
@@ -54,13 +75,32 @@ namespace Ordernary.Controllers
                 return NotFound();
             }
 
-            article.Price = articleDto.Price;
             article.Name = articleDto.Name;
+            article.Price = articleDto.Price;
+            article.Category = articleDto.Category;
+            
+
+            if (articleDto.Photo != null)
+            {
+                var uploadResult = new ImageUploadResult();
+                using (var stream = articleDto.Photo.OpenReadStream())
+                {
+                    var uploadParams = new ImageUploadParams()
+                    {
+                        File = new FileDescription(articleDto.Photo.FileName, stream),
+                        Transformation = new Transformation().Width(500).Height(500).Crop("fill")
+                    };
+                    uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                }
+
+                article.ImageUrl = uploadResult.SecureUrl.ToString();
+            }
 
             await _articleRepository.UpdateAsync(article);
             await _articleRepository.SaveChangesAsync();
             return NoContent();
         }
+
         [HttpDelete("delete{id}")]
         public async Task<IActionResult> DeleteArticle(int id)
         {
