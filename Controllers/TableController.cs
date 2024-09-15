@@ -37,6 +37,7 @@ namespace Ordernary.Controllers
             {
                 Occupied = false,
                 WeiterCall = false,
+                Number = tableDto.Number
             };
 
             await _tableRepository.AddAsync(table);
@@ -56,6 +57,7 @@ namespace Ordernary.Controllers
             // Update the existing table with the DTO values
             table.Occupied = tableDto.Occupied;
             table.WeiterCall = tableDto.WeiterCall;
+            table.Number = tableDto.Number;
 
             await _tableRepository.UpdateAsync(table);
             await _tableRepository.SaveChangesAsync();
