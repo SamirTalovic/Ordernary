@@ -70,5 +70,18 @@ namespace Ordernary.Controllers
             await _tableRepository.SaveChangesAsync();
             return NoContent();
         }
+        [HttpPost("assign")]
+        public async Task<IActionResult> AssignTablesToWaiter([FromBody] AssignTablesDto request)
+        {
+            try
+            {
+                await _tableRepository.AssignTablesToWaiterAsync(request.WaiterId, request.TableIds);
+                return Ok("Tables assigned to the waiter successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

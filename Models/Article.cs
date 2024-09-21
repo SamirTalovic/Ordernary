@@ -8,5 +8,8 @@
         public List<OrderArticle> OrderArticles { get; set; }
         public string Category { get; set; }
         public string ImageUrl { get; set; }
+        public int AdminId { get; set; } 
+        public AppUser Admin { get; set; }
+        public List<Ingredient>? Ingredients { get; set; }
     }
 }

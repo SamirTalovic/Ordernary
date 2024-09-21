@@ -8,5 +8,9 @@
         public DateTime CreatedAt { get; set; }
         public List<OrderArticle> OrderArticles { get; set; }
         public bool Done { get; set; }
+        public bool IsOnline { get; set; }
+        public bool IsPickUp { get; set; }
+        public string CustomerName { get; set; } 
+        public string DeliveryAddress { get; set; }
     }
 }

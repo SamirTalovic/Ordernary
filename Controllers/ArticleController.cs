@@ -1,10 +1,10 @@
-﻿using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Ordernary.Models;
 using Ordernary.Models.DTOs;
 using Ordernary.Repositories.Implementation;
 using Ordernary.Repositories.Interface;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 namespace Ordernary.Controllers
 {
@@ -14,18 +14,23 @@ namespace Ordernary.Controllers
     {
         private readonly Cloudinary _cloudinary;
         private readonly IArticleInterface _articleRepository;
-        public ArticleController(IArticleInterface articleInterface, Cloudinary cloudinary)
+        private readonly IIngredientInterface _ingredientRepository;
+
+        public ArticleController(IArticleInterface articleInterface, IIngredientInterface ingredientInterface, Cloudinary cloudinary)
         {
             _articleRepository = articleInterface;
+            _ingredientRepository = ingredientInterface;
             _cloudinary = cloudinary;
         }
+
         [HttpGet("allarticles")]
         public async Task<ActionResult<IEnumerable<Article>>> GetArticles()
         {
             var articles = await _articleRepository.GetAllAsync();
             return Ok(articles);
         }
-        [HttpGet("article{id}")]
+
+        [HttpGet("article/{id}")]
         public async Task<ActionResult<Article>> GetArticle(int id)
         {
             var article = await _articleRepository.GetByIdAsync(id);
@@ -53,12 +58,18 @@ namespace Ordernary.Controllers
                 }
             }
 
+            var ingredients = articleDto.IngredientsIds != null
+                ? (await _ingredientRepository.GetAllAsync())
+                    .Where(i => articleDto.IngredientsIds.Contains(i.IngredientId)).ToList()
+                : null;
+
             var article = new Article
             {
                 Name = articleDto.Name,
                 Price = articleDto.Price,
                 Category = articleDto.Category,
-                ImageUrl = uploadResult.SecureUrl.ToString() 
+                ImageUrl = uploadResult.SecureUrl.ToString(),
+                Ingredients = ingredients
             };
 
             await _articleRepository.AddAsync(article);
@@ -66,7 +77,8 @@ namespace Ordernary.Controllers
 
             return CreatedAtAction(nameof(GetArticle), new { id = article.ArticleId }, article);
         }
-        [HttpPut("update{id}")]
+
+        [HttpPut("update/{id}")]
         public async Task<IActionResult> PutArticle(int id, [FromForm] ArticleDTO articleDto)
         {
             var article = await _articleRepository.GetByIdAsync(id);
@@ -78,7 +90,12 @@ namespace Ordernary.Controllers
             article.Name = articleDto.Name;
             article.Price = articleDto.Price;
             article.Category = articleDto.Category;
-            
+
+            if (articleDto.IngredientsIds != null)
+            {
+                article.Ingredients = (await _ingredientRepository.GetAllAsync())
+                    .Where(i => articleDto.IngredientsIds.Contains(i.IngredientId)).ToList();
+            }
 
             if (articleDto.Photo != null)
             {
@@ -101,7 +118,8 @@ namespace Ordernary.Controllers
             return NoContent();
         }
 
-        [HttpDelete("delete{id}")]
+
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteArticle(int id)
         {
             await _articleRepository.DeleteAsync(id);

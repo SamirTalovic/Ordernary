@@ -7,6 +7,10 @@ using Ordernary.Repositories.Implementation;
 using Ordernary.Repositories.Interface;
 using Ordernary.Services.ServiceInterfaces;
 using Ordernary.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Office.Interop.Word;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHangfire(config => config.UseMemoryStorage());
@@ -28,10 +32,31 @@ builder.Services.AddSingleton<Cloudinary>(sp =>
     );
     return new Cloudinary(cloudinaryAccount);
 });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(x =>
+{
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = "localhost",
+        ValidAudience = "localhost",
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("S3DJ8JDNafnhaj812222FAFAFADADADADADASASASASASASA")),
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 builder.Services.AddSignalR();
-
- builder.Services.AddControllers().AddJsonOptions(options =>
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+builder.Services.AddControllers().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
         });
@@ -52,6 +77,10 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
