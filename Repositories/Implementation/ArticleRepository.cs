@@ -15,11 +15,11 @@ namespace Ordernary.Repositories.Implementation
         }
         public async Task<IEnumerable<Article>> GetAllAsync()
         {
-            return await _context.Articles.ToListAsync();
+            return await _context.Articles.Include(a => a.Ingredients).ToListAsync();
         }
         public async Task<Article> GetByIdAsync(int articleId)
         {
-            return await _context.Articles.FindAsync(articleId);
+            return await _context.Articles.Include(a => a.Ingredients).FirstOrDefaultAsync(a => a.ArticleId == articleId);
         }
         public async Task AddAsync(Article article)
         {

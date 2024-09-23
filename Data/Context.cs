@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Ordernary.Models;
+using System.Reflection.Emit;
 
 namespace Ordernary.Data
 {
@@ -9,6 +10,7 @@ namespace Ordernary.Data
         {
         }
 
+        public DbSet<Restaurant> Restaurants { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Table> Tables { get; set; }
@@ -18,6 +20,12 @@ namespace Ordernary.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<AppUser>()
+             .HasOne(u => u.Restaurant)
+             .WithOne(a=>a.Owner)
+             .HasForeignKey<Restaurant>(r => r.OwnerId)
+             .OnDelete(DeleteBehavior.SetNull);
 
             builder.Entity<Table>()
                 .HasMany(t => t.Orders)

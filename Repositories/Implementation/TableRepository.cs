@@ -25,6 +25,20 @@ namespace Ordernary.Repositories.Implementation
         {
             await _context.Tables.AddAsync(table);
         }
+        public async Task AssignTablesToWaiterAsync(int waiterId, List<int> tableIds)
+        {
+            var waiter = await _context.AppUsers.FindAsync(waiterId);
+            if (waiter == null || waiter.Role != Role.WEITER)
+                throw new Exception("Waiter not found or invalid role.");
+
+            var tables = await _context.Tables.Where(t => tableIds.Contains(t.TableId)).ToListAsync();
+            foreach (var table in tables)
+            {
+                table.WeiterId = waiterId; 
+            }
+
+            await _context.SaveChangesAsync();
+        }
         public async Task UpdateAsync(Table table)
         {
             _context.Tables.Update(table);

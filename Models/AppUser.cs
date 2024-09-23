@@ -15,9 +15,10 @@
             public string Email { get; set; }
             public string PasswordHash { get; set; }
             public Role Role { get; set; }
-
             public List<Table>? Tables { get; set; } 
-            public List<Article>? CreatedArticles { get; set; } 
-        }
+            public List<Article>? CreatedArticles { get; set; }
+            public int RestaurantId{ get; set; }
+            public Restaurant Restaurant { get; set; }
+    }
     }
 

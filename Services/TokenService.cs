@@ -20,7 +20,7 @@ namespace Ordernary.Services
             TokenDuration = 30;
 
         }
-        public string GenerateToken(string appuserid, string name, string surname, string email, string role)
+        public string GenerateToken(string appuserid, string name, string surname, string email, string role,string restaurantid)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
 
@@ -33,6 +33,7 @@ namespace Ordernary.Services
                 new Claim("surname",surname),
                 new Claim("email",email),
                 new Claim("role",role),
+                new Claim("restaurantid",restaurantid)
                 
 
 

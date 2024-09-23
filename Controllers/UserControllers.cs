@@ -20,19 +20,40 @@ namespace Ordernary.Controllers
         }
         [AllowAnonymous]
         [HttpPost("CreateUser")]
-        public IActionResult Create(AppUser user)
+        public IActionResult Create(AppUserDTO userDto)
         {
-
-            if (_context.AppUsers.Where(u => u.Email == user.Email).FirstOrDefault() != null)
+            if (_context.AppUsers.Any(u => u.Email == userDto.Email))
             {
-                return Ok("Alredy exist");
+                return Ok("User already exists");
             }
 
-            _context.AppUsers.Add(user);
+            var newUser = new AppUser
+            {
+                Name = userDto.Name,
+                Surname = userDto.Surname,
+                Email = userDto.Email,
+                PasswordHash = userDto.PasswordHash, // Ensure password hashing is done securely
+                Role = userDto.Role
+            };
+
+            if (userDto.Role == Role.ADMIN)
+            {
+                var newRestaurant = new Restaurant
+                {
+                    Name = userDto.RestaurantName, // Assuming the restaurant name is passed in DTO
+                    Owner = newUser
+                };
+
+                _context.Restaurants.Add(newRestaurant);
+                newUser.Restaurant = newRestaurant;
+            }
+
+            _context.AppUsers.Add(newUser);
             _context.SaveChanges();
 
-            return Ok("Created");
+            return Ok("User and Restaurant created successfully");
         }
+
         [AllowAnonymous]
         [HttpPost("LoginUser")]
         public IActionResult Login(Login user)
@@ -45,7 +66,8 @@ namespace Ordernary.Controllers
                     userAvailable.Name,
                     userAvailable.Surname,
                     userAvailable.Email,
-                    userAvailable.Role.ToString()
+                    userAvailable.Role.ToString(),
+                    userAvailable.RestaurantId.ToString()
                     )) ;
             }
             return Ok("Failure");

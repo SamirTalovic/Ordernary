@@ -8,7 +8,7 @@
         public bool WeiterCall { get; set; }
         public int Number { get; set; }
         public bool SmokingArea { get; set; }
-        public int WeiterId { get; set; } 
-        public AppUser Weiter { get; set; }
+        public int? WeiterId { get; set; } 
+        public AppUser? Weiter { get; set; }
     }
 }
