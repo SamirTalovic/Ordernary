@@ -63,7 +63,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<Context>(options => options.UseSqlServer(@"Server=.;Database=Ordernary;Trusted_Connection=True;TrustServerCertificate=True;"));
+builder.Services.AddDbContext<Context>(options => options.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=Ordernary;Trusted_Connection=True;TrustServerCertificate=True;"));
 
 var app = builder.Build();
 app.UseHangfireDashboard();

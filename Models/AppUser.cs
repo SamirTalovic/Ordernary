@@ -17,8 +17,8 @@
             public Role Role { get; set; }
             public List<Table>? Tables { get; set; } 
             public List<Article>? CreatedArticles { get; set; }
-            public int RestaurantId{ get; set; }
-            public Restaurant Restaurant { get; set; }
+            public int? RestaurantId{ get; set; }
+            public Restaurant? Restaurant { get; set; }
     }
     }
 
